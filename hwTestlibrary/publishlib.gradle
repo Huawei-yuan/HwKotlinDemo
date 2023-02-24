@@ -1,0 +1,98 @@
+//plugins {
+//    id 'maven-publish'
+//}
+apply plugin: 'maven-publish'
+
+
+def GROUP_ID = "com.hw.lib.testlib"
+def ARTIFACT_ID = "hwTestLibrary"
+def LIB_VERSION = "1.0.0"
+
+def MAVEN_NAME = "hwTestLib"
+def MAVEN_GROUP_URL = "http://localhost:8081/repository/maven-public/"
+
+def MAVEN_URL = "http://localhost:8081/repository/maven-releases"
+def MAVEN_SNAPSHOT_URL = "http://localhost:8081/repository/maven-snapshots/"
+
+def NEXUS_USERNAME = "huawei"
+def NEXUS_PASSWORD = "yhwyhw"
+
+def POM_NAME = "hwTestLib"
+def POM_URL = "https://github.com/Huawei-yuan/HwKotlinDemo"
+
+//developer
+def POM_DEVELOPER_NAME="Hw.Yuan"
+def POM_DEVELOPER_EMAIL = "huawei.yuan16@gmail.com"
+def POM_DESCRIPTION="This is huawei\'s first test aar library" //描述
+
+//打包main目录下代码和资源的 task
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives androidSourcesJar
+}
+
+afterEvaluate {
+//    version =  "${LIB_VERSION}-SNAPSHOT"
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = GROUP_ID
+                artifactId = ARTIFACT_ID
+                version = LIB_VERSION
+
+//                artifact androidSourcesJar // 打包源码到工件中
+//                artifact("$buildDir/outputs/aar/hwTestlibrary-release.aar")
+
+                pom {
+                    name = POM_NAME // (可选)为工件取一个名字
+                    description = POM_DESCRIPTION
+                    url = POM_URL // (可选)网站地址
+                    developers {
+                        developer {
+                            name = POM_DEVELOPER_NAME // (可选)开发者名称
+                            email = POM_DEVELOPER_EMAIL // (可选)开发者邮箱
+                        }
+                    }
+                }
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = GROUP_ID
+                artifactId = ARTIFACT_ID
+                version = "${LIB_VERSION}-SNAPSHOT"
+
+//                artifact androidSourcesJar  // 打包源码到工件中
+//                artifact("$buildDir/outputs/aar/hwTestlibrary-debug.aar")
+            }
+        }
+
+        repositories {
+            maven {
+                name = MAVEN_NAME
+                allowInsecureProtocol true
+//            url MAVEN_GROUP_URL
+                //nexus3没有开启匿名用户访问的话，添加认证信息
+                credentials {
+                    username = NEXUS_USERNAME
+                    password = NEXUS_PASSWORD
+                }
+                def releasesRepoUrl = MAVEN_URL
+                def snapshotsRepoUrl = MAVEN_SNAPSHOT_URL
+                println("version = " + version)
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
+    }
+}

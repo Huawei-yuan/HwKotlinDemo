@@ -11,6 +11,14 @@ pluginManagement {
             allowInsecureProtocol = true
             url 'http://localhost:8081/repository/maven-public/'
         }
+//        maven {
+//            credentials {
+//                username "admin"
+//                password "yhwyhw123"
+//            }
+//            allowInsecureProtocol = true
+//            url "http://localhost:8081/repository/maven-releases/"
+//        }
     }
 }
 dependencyResolutionManagement {
